@@ -192,6 +192,31 @@ resource "helm_release" "external_secrets" {
   }
   depends_on = [aws_eks_node_group.main]
 }
+resource "helm_release" "ingress_nginx" {
+  name             = "ingress-nginx"
+  namespace        = "ingress-nginx"
+  create_namespace = true
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  version          = "4.12.1"
+  set {
+    name  = "controller.service.type"
+    value = "LoadBalancer"
+  }
+  set {
+    name  = "controller.ingressClass"
+    value = "nginx"
+  }
+  set {
+    name  = "controller.ingressClassResource.name"
+    value = "nginx"
+  }
+  set {
+    name  = "controller.ingressClassResource.default"
+    value = "true"
+  }
+  depends_on = [aws_eks_node_group.main]
+}
 resource "helm_release" "argocd" {
   name             = "argocd"
   namespace        = "argocd"
