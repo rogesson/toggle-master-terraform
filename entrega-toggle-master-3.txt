@@ -1,0 +1,20 @@
+Grupo 169
+
+Participantes:
+
+Rogesson Barboza da Silva Souza
+rogessonb@gmail.com
+RM: RM373923
+Discord: _resque
+
+Repositório da Aplicação: https://github.com/rogesson/toggle-master-terraform
+
+Videos de Apresentação:
+
+Parte 1 - Toggle Master - Fase 3 - AWS + Kubernetes
+https://youtu.be/jfi_kablOg8
+
+Parte 2 - Toggle Master - Fase 3 - GitOps + ArgoCD
+https://youtu.be/slIUynAUHyg
+
+
