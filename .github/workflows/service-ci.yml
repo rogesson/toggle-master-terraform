@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-go@v6
         if: inputs.language == 'go'
         with:
-          go-version: '1.22'
+          go-version: '1.23'
           cache: false
       - uses: actions/setup-python@v6
         if: inputs.language == 'python'
@@ -49,7 +49,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ inputs.language }}" = "go" ]; then
-            go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+            go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
             golangci-lint run
           else
             pip install flake8 bandit
