@@ -16,4 +16,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8003")))
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "8003")))  # nosec B104 - required for Kubernetes traffic
