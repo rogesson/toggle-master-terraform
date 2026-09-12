@@ -1,0 +1,10 @@
+name: flag-service
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  ci:
+    uses: ./.github/workflows/service-ci.yml
+    with: { service: flag-service, language: python }
+    secrets: inherit

@@ -1,0 +1,123 @@
+name: Microservice CI
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      language:
+        required: true
+        type: string
+    secrets:
+      AWS_GITHUB_ACTIONS_ROLE_ARN:
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+  security-events: write
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        if: inputs.language == 'go'
+        with:
+          go-version: '1.22'
+      - uses: actions/setup-python@v5
+        if: inputs.language == 'python'
+        with:
+          python-version: '3.11'
+      - name: Build and unit tests
+        working-directory: ${{ inputs.service }}
+        shell: bash
+        run: |
+          if [ "${{ inputs.language }}" = "go" ]; then
+            go test ./... -cover
+            go build ./...
+          elif [ -f requirements.txt ]; then
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            if [ -d tests ]; then pytest -q; else python -m compileall -q .; fi
+          fi
+      - name: Lint and static analysis
+        working-directory: ${{ inputs.service }}
+        shell: bash
+        run: |
+          if [ "${{ inputs.language }}" = "go" ]; then
+            go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+            golangci-lint run
+          else
+            pip install flake8 bandit
+            flake8 .
+            bandit -r . -ll
+          fi
+
+  security:
+    needs: build-test-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        if: inputs.language == 'python'
+        with:
+          python-version: '3.11'
+      - name: Install Python security tooling
+        if: inputs.language == 'python'
+        run: pip install bandit
+      - name: Trivy SCA filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: ${{ inputs.service }}
+          vuln-type: library
+          severity: CRITICAL
+          exit-code: '1'
+      - name: Go SAST
+        if: inputs.language == 'go'
+        uses: securego/gosec@master
+        with:
+          args: ./...
+      - name: Python SAST
+        if: inputs.language == 'python'
+        working-directory: ${{ inputs.service }}
+        run: bandit -r . -ll
+
+  image:
+    needs: security
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+      - name: Build image
+        run: docker build -t "${{ steps.ecr.outputs.registry }}/${{ inputs.service }}:${IMAGE_TAG}" "${{ inputs.service }}"
+      - name: Scan image and block critical vulnerabilities
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ steps.ecr.outputs.registry }}/${{ inputs.service }}:${{ env.IMAGE_TAG }}
+          vuln-type: os,library
+          severity: CRITICAL
+          exit-code: '1'
+      - name: Push image
+        run: docker push "${{ steps.ecr.outputs.registry }}/${{ inputs.service }}:${IMAGE_TAG}"
+      - name: Update GitOps image tag
+        run: |
+          file="gitops/base/${{ inputs.service }}/deployment.yaml"
+          sed -i -E "s|(image: .*/${{ inputs.service }}:).*|\1${IMAGE_TAG}|" "$file"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add "$file"
+          git commit -m "chore(gitops): deploy ${{ inputs.service }} ${IMAGE_TAG}" || exit 0
+          git push

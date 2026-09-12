@@ -1,0 +1,15 @@
+aws_region       = "us-east-1"
+environment      = "staging"
+cluster_name     = "toggle-master"
+academy_mode     = true
+lab_role_name    = "LabRole"
+# database_password = "set-with-TF_VAR_database_password"
+
+# Values below are examples only. Supply real values through a CI secret or TF_VAR_secret_values.
+# secret_values = {
+#   AUTH_DB_URL = "postgres://..."
+#   FLAGS_DB_URL = "postgres://..."
+#   REDIS_URL = "redis://..."
+#   MASTER_KEY = "..."
+#   SERVICE_API_KEY = "..."
+# }
