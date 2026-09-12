@@ -70,7 +70,7 @@ jobs:
         if: inputs.language == 'python'
         run: pip install bandit
       - name: Trivy SCA filesystem scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: ${{ inputs.service }}
@@ -105,7 +105,7 @@ jobs:
       - name: Build image
         run: docker build -t "${{ steps.ecr.outputs.registry }}/${{ inputs.service }}:${IMAGE_TAG}" "${{ inputs.service }}"
       - name: Scan image and block critical vulnerabilities
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ steps.ecr.outputs.registry }}/${{ inputs.service }}:${{ env.IMAGE_TAG }}
           vuln-type: os,library
