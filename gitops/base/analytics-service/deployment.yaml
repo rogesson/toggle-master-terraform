@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: analytics-service
-          image: AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/analytics-service:initial
+          image: 325898365409.dkr.ecr.us-east-1.amazonaws.com/analytics-service:initial
           ports: [{ containerPort: 8005 }]
           env:
             - { name: PORT, value: "8005" }

@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: flag-service
-          image: AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/flag-service:initial
+          image: 325898365409.dkr.ecr.us-east-1.amazonaws.com/flag-service:initial
           ports: [{ containerPort: 8002 }]
           env:
             - { name: PORT, value: "8002" }

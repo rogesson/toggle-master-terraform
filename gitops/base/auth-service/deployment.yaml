@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/auth-service:initial
+          image: 325898365409.dkr.ecr.us-east-1.amazonaws.com/auth-service:initial
           ports: [{ containerPort: 8001 }]
           env:
             - { name: PORT, value: "8001" }

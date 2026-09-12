@@ -182,7 +182,15 @@ resource "helm_release" "external_secrets" {
   repository       = "https://charts.external-secrets.io"
   chart            = "external-secrets"
   version          = "0.10.5"
-  depends_on       = [aws_eks_node_group.main]
+  set {
+    name  = "hostNetwork"
+    value = "true"
+  }
+  set {
+    name  = "dnsPolicy"
+    value = "ClusterFirstWithHostNet"
+  }
+  depends_on = [aws_eks_node_group.main]
 }
 resource "helm_release" "argocd" {
   name             = "argocd"

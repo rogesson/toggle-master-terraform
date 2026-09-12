@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: evaluation-service
-          image: AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/evaluation-service:initial
+          image: 325898365409.dkr.ecr.us-east-1.amazonaws.com/evaluation-service:initial
           ports: [{ containerPort: 8004 }]
           env:
             - { name: PORT, value: "8004" }

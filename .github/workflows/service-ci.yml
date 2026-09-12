@@ -115,7 +115,8 @@ jobs:
       - name: Update GitOps image tag
         run: |
           file="gitops/base/${{ inputs.service }}/deployment.yaml"
-          sed -i -E "s|(image: .*/${{ inputs.service }}:).*|\1${IMAGE_TAG}|" "$file"
+          image="${{ steps.ecr.outputs.registry }}/${{ inputs.service }}:${IMAGE_TAG}"
+          sed -i -E "s|image: .*|image: ${image}|" "$file"
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add "$file"
